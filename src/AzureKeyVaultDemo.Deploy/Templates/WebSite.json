@@ -24,7 +24,7 @@
     },
     "repoURL": {
       "type": "string",
-      "defaultValue": "https://github.com/davidebbo-test/Mvc52Application.git"
+      "defaultValue": "https://github.com/s-innovations/S-Innovations.Azure.Demos.git"
     },
     "branch": {
       "type": "string",
@@ -300,8 +300,8 @@
          "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
        ],
        "properties":{
-         "RepoUrl":"https://github.com/s-innovations/S-Innovations.Azure.Demos.git",
-         "branch":"master"
+         "RepoUrl": "[parameters('repoURL')]",
+         "branch":"[parameters('branch')]"
        }
      }
   ]
