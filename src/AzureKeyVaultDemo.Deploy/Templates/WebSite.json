@@ -9,7 +9,15 @@
       "type": "string"
     },
     "siteLocation": {
-      "type": "string"
+      "type": "string",
+      "allowedValues": [
+        "West Europe",
+        "East Asia",
+        "Southeast Asia",
+        "East US",
+        "West US"
+      ],
+      "defaultValue": "West Europe"
     },
     "sku": {
       "type": "string",
@@ -293,16 +301,16 @@
       }
     },
     {
-       "apiVersion":"2015-08-01",
-       "name":"web",
-       "type":"sourcecontrols",
-       "dependsOn":[
-         "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
-       ],
-       "properties":{
-         "RepoUrl": "[parameters('repoURL')]",
-         "branch":"[parameters('branch')]"
-       }
-     }
+      "apiVersion": "2015-08-01",
+      "name": "web",
+      "type": "sourcecontrols",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
+      ],
+      "properties": {
+        "RepoUrl": "[parameters('repoURL')]",
+        "branch": "[parameters('branch')]"
+      }
+    }
   ]
 }
