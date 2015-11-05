@@ -300,7 +300,7 @@
          "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
        ],
        "properties":{
-         "RepoUrl":"https://github.com/davidebbo-test/Mvc52Application.git",
+         "RepoUrl":"https://github.com/s-innovations/S-Innovations.Azure.Demos.git",
          "branch":"master"
        }
      }
