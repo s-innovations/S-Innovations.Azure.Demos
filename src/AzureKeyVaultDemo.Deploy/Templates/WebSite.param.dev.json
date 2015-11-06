@@ -11,6 +11,9 @@
     "siteLocation": {
       "value": "West Europe"
     },
+    "repoURL": {
+      "value": "https://github.com/s-innovations/S-Innovations.Azure.Demos.git"
+    },
     "sku": { "value": "Free" }
   }
 }

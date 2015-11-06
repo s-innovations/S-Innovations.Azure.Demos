@@ -92,7 +92,7 @@
             "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
           ],
           "properties": {
-            "PROJECT": "src\\AzureKeyVaultDemo\\AzureKeyVaultDemo.xproj",
+            "PROJECT": "src/AzureKeyVaultDemo/AzureKeyVaultDemo.xproj",
             "clientUrl": "[concat('http://', parameters('siteName'), '.azurewebsites.net')]"
           }
         },
@@ -106,7 +106,7 @@
           "properties": {
             "RepoUrl": "[parameters('repoURL')]",
             "branch": "[parameters('branch')]",
-            "IsManualIntegration" :  true
+            "isManualIntegration" :  true
           }
         }
       ]
