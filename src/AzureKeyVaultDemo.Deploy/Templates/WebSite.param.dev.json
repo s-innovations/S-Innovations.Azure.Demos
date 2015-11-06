@@ -1,15 +1,16 @@
 ﻿{
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "siteName": {
-            "value": null
-        },
-        "hostingPlanName": {
-            "value": null
-        },
-        "siteLocation": {
-            "value": null
-        }
-    }
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "siteName": {
+      "value": "pksorensentest"
+    },
+    "hostingPlanName": {
+      "value": "pksorensentest"
+    },
+    "siteLocation": {
+      "value": "West Europe"
+    },
+    "sku": { "value": "Free" }
+  }
 }
