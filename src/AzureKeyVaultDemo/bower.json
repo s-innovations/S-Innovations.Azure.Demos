@@ -1,0 +1,7 @@
+{
+  "name": "ASP.NET",
+  "private": true,
+  "dependencies": {
+    "si-portal-framework": "s-innovations/S-Innovations.PortalFramework"
+  }
+}

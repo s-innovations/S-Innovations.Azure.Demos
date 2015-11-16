@@ -1,0 +1,33 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="style.min.css" rel="stylesheet" />
+    <script src="libs/requirejs/require.js"></script>
+    <script>
+        require.config({
+            paths: {
+                "si-portal-framework": "libs/si-portal-framework/dist/src",
+                "template": "libs/si-portal-framework/dist/src/koExtensions/template",
+                "stringTemplateEngine": "libs/si-portal-framework/dist/src/koExtensions/stringTemplateEngine",
+                "text": "libs/text/text",
+                "knockout": "libs/knockout/knockout",
+            }
+        });
+
+
+
+
+        /// Azure Portal Demo
+        require(["libs/azurekeyvault-demo/loader"],
+            function (loader) {
+                new loader();
+            });
+
+
+    </script>
+</head>
+<body class="si-theme-dark">
+    <!-- koLayout: $data -->
+</body>
+</html>

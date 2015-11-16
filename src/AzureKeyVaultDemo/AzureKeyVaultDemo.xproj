@@ -15,5 +15,9 @@
     <SchemaVersion>2.0</SchemaVersion>
     <DevelopmentServerPort>11809</DevelopmentServerPort>
   </PropertyGroup>
+  <ItemGroup>
+    <DnxInvisibleFolder Include="bower_components\" />
+    <DnxInvisibleFolder Include="wwwroot\libs\" />
+  </ItemGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>

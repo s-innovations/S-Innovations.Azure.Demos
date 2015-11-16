@@ -1,0 +1,8 @@
+<!-- <amd-dependency path="si-portal-framework/koExtensions/singleClickBindingHandler" /> -->
+
+<div class="startup-form">
+    <ul class="tab-group">
+        <li class="tab active" data-bind="css:{active:isFirstVisit}"><a href="#signup" data-bind="singleClick : signup">Sign Up</a></li>
+        <li class="tab"  data-bind="css:{active:!isFirstVisit()}"><a href="#login" data-bind="singleClick: login">Log In</a></li>
+    </ul>
+</div>

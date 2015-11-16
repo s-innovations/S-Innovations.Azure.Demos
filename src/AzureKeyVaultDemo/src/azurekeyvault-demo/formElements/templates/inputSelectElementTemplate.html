@@ -1,0 +1,39 @@
+<div class="si-form-element si-control-base si-textField" data-validatable="true">
+    <div class="si-form-labelcontainer si-text-label">
+        <div class="si-control si-dockedballoon-requiredwidget si-dockedballoon-required" data-control="true" style="display: inline-block;">
+            <div class="azc-dockedballoon-anchor">
+                <div class="si-required-anchor">
+                    <svg viewBox="0 0 6 6" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svg="http://www.w3.org/2000/svg" class="" focusable="false"><path id="required-Star" d="M3.54324829,2.35189794 L5.62289981,1.63596764 L6,2.6869944 L3.92408214,3.36185439 L5.20939639,5.15774735 L4.26664593,5.83354076 L3.02520224,3.96670815 L1.76135656,5.83354076 L0.790603611,5.15774735 L2.0955196,3.36185439 L0,2.6869944 L0.380833851,1.63036715 L2.43808339,2.37336652 L2.43808339,0.233042935 L3.54324829,0.233042935 L3.54324829,2.35189794 Z" class="si-svg-c22"></path></svg>
+                </div>
+            </div>
+        </div>
+        <label for="si-form-guid-dc08a778059f4b8c8e18c751ae584c940-1c5" data-bind="text:label"></label>
+        <div class="si-control si-dockedballoon si-dockedballoon-info" data-control="true">
+            <div class="si-dockedballoon-anchor">
+
+                <div class="si-fill-muted si-fill-hovered-heavy si-dockedballoon-anchor-target" data-bind="css: { 'si-fill-heavy': balloonVisible }">
+                    <svg viewBox="0 0 9 9" focusable="false">
+                        <circle cx="4.5" cy="4.5" r="4.5"></circle>
+                        <rect x="4" y="4" class="si-fill-white" width="1" height="3"></rect>
+                        <rect x="4" y="2" class="si-fill-white" width="1" height="1"></rect>
+                    </svg>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="si-formElementContainer">
+        <div class="si-control si-editableControl si-validatableControl si-dropdown si-groupDropDown si-validatableControl-none" data-control="true" data-editable="true" data-canfocus="true">
+            <div class="si-dropdown-wrapper si-input" data-bind="css: { 'si-br-invalid': validationState() === 1, 'si-br-edited': dirty, 'si-disabled': disabled, 'si-br-focused': focused }">
+                <span class="si-dropdown-current" data-bind="text: currentItemText"></span>
+                <span class="si-dropdown-arrow si-dropdown-arrow-normal"></span>
+                <select class="si-dropdown-select si-formControl" data-bind="attr: { name: name }, value: value, valueAllowUnset: true" name="__azc-groupDropDown0-2" data-validatable-control-valid="false" data-validatable-control-validation-state="none" id="si-form-guid-f248f5bb09c7450a8f6eaee2edec60620-1cf">
+
+                    <!-- ko foreach: { data: items, afterAdd: syncSelectedIndex.bind($data) } -->                    
+                        <option data-bind="text: text, value: value, disable: disabled"></option>
+                    <!-- /ko -->
+                </select>
+            </div>
+        </div>
+    </div>
+</div>

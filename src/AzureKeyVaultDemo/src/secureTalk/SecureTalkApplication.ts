@@ -1,0 +1,6 @@
+
+
+class SecureTalkApplication {
+
+}
+export = SecureTalkApplication;
