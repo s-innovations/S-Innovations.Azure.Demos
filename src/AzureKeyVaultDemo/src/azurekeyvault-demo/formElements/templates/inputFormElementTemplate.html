@@ -23,9 +23,9 @@
         </div>
     </div>
     <div class="si-formElementContainer">
-        <div class="si-control si-editableControl si-validatableControl si-textBox si-validatableControl-none" data-control="true" data-editable="true" data-canfocus="true">
+        <div class="si-control si-editableControl si-validatableControl si-textBox ", data-bind="css:{'si-is-edited':isModified,'si-validatableControl-invalid':isInvalid,'si-validatableControl-none':isValid}," data-control="true" data-editable="true" data-canfocus="true">
             <div class="si-textBox-wrapper">
-                <input class="si-input azc-formControl" type="text" data-bind="value: value, hasFocus: focused, css: { 'azc-br-invalid': validationState() === 1, 'si-br-edited': dirty, 'si-disabled': disabled, 'si-br-focused': focused }, valueUpdate: getValueUpdateTrigger(), attr: { name: name, placeholder: placeholder, readonly: readonly }"  data-validatable-control-valid="false" data-validatable-control-validation-state="none" id="si-form-guid-dc08a778059f4b8c8e18c751ae584c940-1c5">
+                <input class="si-input si-formControl" type="text" data-bind="value: value, hasFocus: focused, css: { 'si-br-invalid': validationState() === 1, 'si-br-edited': dirty, 'si-disabled': disabled, 'si-br-focused': focused }, valueUpdate: valueUpdateTrigger(), attr: { name: name, placeholder: placeholder, readonly: readonly, required:required }"  data-validatable-control-valid="false" data-validatable-control-validation-state="none" id="si-form-guid-dc08a778059f4b8c8e18c751ae584c940-1c5">
             </div>
         </div>
     </div>

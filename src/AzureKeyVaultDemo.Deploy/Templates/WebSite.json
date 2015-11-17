@@ -8,6 +8,13 @@
     "hostingPlanName": {
       "type": "string"
     },
+    "storageAccountType": {
+      "type": "string",
+      "allowedValues": [
+        "Standard_LRS"
+      ],
+      "defaultValue": "Standard_LRS"
+    },
     "siteLocation": {
       "type": "string",
       "allowedValues": [
@@ -30,9 +37,21 @@
       ],
       "defaultValue": "Free"
     },
+    "tenantId": {
+      "type": "string"
+    },
+    "objectId": {
+      "type": "string"
+    },
+      "appOwnerTenantId": {
+      "type": "string"
+    },
+    "appOwnerObjectId": {
+      "type": "string"
+    },
     "repoURL": {
       "type": "string",
-      "defaultValue": "https://github.com/s-innovations/S-Innovations.Azure.Demos.git"
+      "defaultValue": "https://github.com/s-innovations/S-Innovations.Azure.Demos"
     },
     "branch": {
       "type": "string",
@@ -48,6 +67,10 @@
       "defaultValue": "0"
     }
   },
+  "variables": {
+    "newStorageAccountName": "[uniqueString(resourceGroup().id, deployment().name)]",
+    "newkeyVaultName": "[uniqueString(resourceGroup().id, deployment().name)]"
+  },
   "resources": [
     {
       "apiVersion": "2015-08-01",
@@ -61,7 +84,7 @@
         "tier": "Free",
         "name": "F1"
       },
-      "properties": { 
+      "properties": {
         "workerSize": "[parameters('workerSize')]",
         "numberOfWorkers": 1
       }
@@ -92,7 +115,7 @@
             "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]",
           ],
           "properties": {
-            "PROJECT": "src/AzureKeyVaultDemo/AzureKeyVaultDemo.xproj",
+            "PROJECT": "src/AzureKeyVaultDemo",
             "clientUrl": "[concat('http://', parameters('siteName'), '.azurewebsites.net')]"
           }
         },
@@ -104,9 +127,11 @@
             "[resourceId('Microsoft.Web/Sites', parameters('siteName'))]"
           ],
           "properties": {
-            "RepoUrl": "[parameters('repoURL')]",
+            "repoUrl": "[parameters('repoURL')]",
             "branch": "[parameters('branch')]",
-            "isManualIntegration" :  true
+            "isManualIntegration": false,
+            "deploymentRollbackEnabled": false,
+            "isMercurial": false
           }
         }
       ]
@@ -328,6 +353,59 @@
       "properties": {
         "applicationId": "[parameters('siteName')]"
       }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('newStorageAccountName')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "accountType": "[parameters('storageAccountType')]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "name": "[variables('newkeyVaultName')]",
+      "apiVersion": "2015-06-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enabledForDeployment":  true,
+        "enabledForDiskEncryption": true,
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": [
+          {
+            "tenantId": "[parameters('tenantId')]",
+            "objectId": "[parameters('objectId')]",
+            "permissions": {
+              "keys": [ "all" ],
+              "secrets": [ "all" ]
+            }
+          },
+           {
+            "tenantId": "[parameters('appOwnerTenantId')]",
+            "objectId": "[parameters('appOwnerObjectId')]",
+            "permissions": {
+              "keys": ["all"],
+              "secrets": ["all"]
+            }
+          }
+        ],
+        "sku": {
+          "name": "premium",
+          "family": "A"
+        }
+      }
     }
-  ]
+
+  ],
+  "outputs": {
+    "storageAccount": {
+      "type": "string",
+      "value": "[variables('newStorageAccountName')]"
+    },
+     "keyvault": {
+        "type": "string",
+        "value": "[variables('newkeyVaultName')]"
+    }
+  }
 }

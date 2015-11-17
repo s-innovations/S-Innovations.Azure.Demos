@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "siteName": {
-      "value": "pksorensentest"
+      "value": "azure-keyvaut-demo"
     },
     "hostingPlanName": {
-      "value": "pksorensentest"
+      "value": "azure-keyvaut-demo"
     },
     "siteLocation": {
       "value": "West Europe"
     },
     "repoURL": {
-      "value": "https://github.com/s-innovations/S-Innovations.Azure.Demos.git"
+      "value": "https://github.com/s-innovations/S-Innovations.Azure.Demos"
     },
     "sku": { "value": "Free" }
   }

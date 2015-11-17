@@ -1,7 +1,7 @@
 <div class="si-submit-container">
     <div class="si-submit-container-create">
-        <button data-bind="singleClick:action" class="si-control-submit-container-button si-control-submit-container-okButton si-control-base si-control-button si-control si-button si-button-default si-btn-primary" data-control="true" role="button" type="button" tabindex="0" aria-disabled="false">
-            <span data-bind="text:submitText">Create</span>
+        <button data-bind="singleClick:action, css:{'si-control-disabled si-disabled': !valid()}, enable:valid" class="si-control-submit-container-button si-control-submit-container-okButton si-control-base si-control-button si-control si-button si-button-default si-btn-primary"  role="button" type="button" tabindex="0">
+            <span data-bind="text:submitText"></span>
             <div class="si-submit-container-externalLink" data-bind="visible: showExternalLinkAdornment" style="display: none;">
                 <svg viewBox="0 0 16 16" class="msportalfx-svg-placeholder" role="img" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <path d="M4.99163818,9.81903076 L13.0101318,1.82769775 L13.0101318,5.83333349 L14,5.83333333 L14,0 L8.16666667,0 L8.16666651,1.00054932 L12.2052002,1.00054932 L4.23181152,8.98626709 L4.99163818,9.81903076 Z"></path>

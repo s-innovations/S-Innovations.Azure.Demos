@@ -9,7 +9,9 @@
     "Microsoft.AspNet.StaticFiles": "1.0.0-beta8",
     "Microsoft.Framework.Logging": "1.0.0-beta8",
     "Microsoft.Framework.Logging.Console": "1.0.0-beta8",
-    "Microsoft.Framework.Logging.Debug" : "1.0.0-beta8"
+    "Microsoft.Framework.Logging.Debug": "1.0.0-beta8",
+    "S-Innovations.ConfigurationManager": "1.0.0-CI00033",
+    "S-Innovations.ConfigurationManager.AzureRoleEnvironmentSettingsProvider": "1.0.0-CI00033"
   },
 
   "commands": {

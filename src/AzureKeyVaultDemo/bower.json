@@ -3,5 +3,8 @@
   "private": true,
   "dependencies": {
     "si-portal-framework": "s-innovations/S-Innovations.PortalFramework"
+  },
+  "devDependencies": {
+    "knockout-validation": "~2.0.3"
   }
 }

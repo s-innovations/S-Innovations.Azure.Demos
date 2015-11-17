@@ -89,7 +89,7 @@ class DeployFlyoutViewModel {
                         }
 
                     }, err=> {
-
+                     
                         alert("Sorry, something went wronge");
 
                     }, JSON.stringify({
@@ -110,10 +110,14 @@ class DeployFlyoutViewModel {
             console.log(JSON.parse(atob(this.opt.oauth.oauthResult.access_token.split(".")[1])));
 
             sendRequest("GET", "https://management.azure.com/subscriptions?api-version=2015-01-01", this.opt.oauth.oauthResult.access_token, (data) => {
-                console.log(data);
-                data.value.forEach(s=> {
-                    this.subscriptionid.items.push({ text: s.displayName, disabled: s.state !== "Enabled", value: s.subscriptionId });
-                });
+                if (!data.value.length) {
+                    this.opt.sideBarVm.isFlyoutOpen(false);
+                    alert("You are not the administrator of any azure subscriptions");
+                } else {
+                    data.value.forEach(s=> {
+                        this.subscriptionid.items.push({ text: s.displayName, disabled: s.state !== "Enabled", value: s.subscriptionId });
+                    });
+                }
                
                 // this.subscriptionid.value(data.value[0].displayName);
             }, () => { });

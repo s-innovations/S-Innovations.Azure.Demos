@@ -93,6 +93,9 @@ class Oauth2Client {
             console.log([stored, result]);
 
             if (result && stored && stored.state === result.state) {
+                if (HashObservable.params()["error"]) {
+                    alert(HashObservable.params()["error"]);
+                }
                 this.storage.setItem(storages[i], JSON.stringify(result));
                 this.oauthResult = result;
                 this.storagePrefix = storages[i];
