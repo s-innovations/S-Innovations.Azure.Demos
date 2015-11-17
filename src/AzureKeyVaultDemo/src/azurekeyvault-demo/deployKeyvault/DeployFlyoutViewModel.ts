@@ -27,7 +27,7 @@ class DeployFlyoutViewModel {
 
         } else {
             if (!this.subscriptionid.value() || !this.location.value() || !this.rg.value() || !this.keyVaultName.value()) {
-                alert("missing fields");
+               
                 return;
             }
             console.log(this.subscriptionid.value());

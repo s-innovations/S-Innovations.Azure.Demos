@@ -33,9 +33,7 @@ namespace DemoCommandLineTools.Tests
                     ConfigurationManager = configurationManager,
                     SecretConverter = DecryptEnvelop
                 });
-
-
-
+            
             var test = configurationManager.GetAzureKeyVaultSecret("storage");
             Console.WriteLine(test.Value);
 

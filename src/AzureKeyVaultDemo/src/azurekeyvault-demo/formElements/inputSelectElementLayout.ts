@@ -37,7 +37,7 @@ class inputSelectElementLayout implements koLayout {
     }
 
     balloonVisible = ko.observable(true);
-    validationState = ko.observable(1);
+    validationState = ko.observable(0);
     dirty = ko.observable(false);
     focused = ko.observable(false);
 

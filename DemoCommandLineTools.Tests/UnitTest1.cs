@@ -10,6 +10,22 @@ namespace DemoCommandLineTools.Tests
     [TestClass]
     public class UnitTest1
     {
+        /// <summary>
+        /// Find your tenant name and set it here for the user you plan to use. You may use the common endpoint but do know that there can be some issues wiht liveids
+        /// </summary>
+        public string TenantName { get; } = "car2cloud.onmicrosoft.com";  //This is what I spend the most time debugging - common vs specific endpoints for liveids.
+
+        /// <summary>
+        /// Create a Native Application in your tenant that will serv as your dev opp application that will delegate acesse as the signed in user.
+        /// 
+        /// Copy the clientID here
+        /// </summary>
+        public string ClientId { get; } = "22a1932b-342b-4571-a037-2d84c15a0e6c";
+
+        /// <summary>
+        /// Also copy the redirect uri;
+        /// </summary>
+        public string RedirectUri { get; } = "https://test.car2cloud.dk";
 
         /// <summary>
         /// Step One : Run this to get your subscription Ids and read the output of the test.
@@ -17,12 +33,13 @@ namespace DemoCommandLineTools.Tests
         [TestMethod]
         public void ListSubscriptions()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-            var tenantName = "car2cloud.onmicrosoft.com";  //This is what I spend the most time debugging - common vs specific endpoints for liveids.
-
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "--listsubscriptions", "-t", tenantName });
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-t", TenantName,"--listsubscriptions" });
         }
+
+        /// <summary>
+        /// Run ListSubscriptions and from output read the subscriptionid of choose.
+        /// </summary>
+        public string SubscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
 
         /// <summary>
         /// Step Two: Run this to see if you have any vaults
@@ -30,12 +47,11 @@ namespace DemoCommandLineTools.Tests
         [TestMethod]
         public void ListVaults()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";            
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-            var tenantName = "car2cloud.onmicrosoft.com"; 
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "--listvaults", "-s", subscriptionId, "-t" , tenantName });
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName , "--listvaults", });
         }
+
+        string ResourceGroupName{ get; set; } = "another-demo-rg";
+        string Location { get; } = "West Europe";
 
         /// <summary>
         /// Heres the code to create a keyvault, but there are also many othr options. Continue to next unittest
@@ -45,34 +61,27 @@ namespace DemoCommandLineTools.Tests
         [TestMethod]
         public void CreateVault()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-            var resourcegroup = "azure-keyvault-demo-temp";
+         
             var vaultName = "cnugdemovaulttemp";
-            var location = "West Europe"; //if i creates the resource group
-
-            var tenantName = "car2cloud.onmicrosoft.com";
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "--AllowUpdate", "--CreateVault", vaultName, "-s", subscriptionId, "-t", tenantName, "--location", location });
+            var appId = ClientId;   //We are giving the devop native application acesss but it do not make sense, the application do
+                                    //not have private keys and can only delegate accesss on behaf of users using it.
+            
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName,
+                "--location", Location, "--AllowUpdate", "--CreateVault", vaultName,"--applicationId", appId});
 
         }
 
         /// <summary>
-        /// This is good for giving a azure ad application accesss to a keyvault, continue to next unittes.
+        /// Add an application to a keyvault based on vaultName and application id.
         /// </summary>
         [TestMethod]
         public void AddApplicationToVault()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-            var tenantName = "car2cloud.onmicrosoft.com";
-
-            var vaultName = "vhsq33ko36y6k";
+            var vaultName = "cnugdemovaulttemp";
             var appId = "fb4fbba5-6fac-404e-b7b6-d7bf4b56a7ea";// "9b93480d-8263-4e97-9e35-0fd857859d0b";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-            var resourcegroup = "azure-keyvaut-demo";
-
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "-s", subscriptionId, "--AddApplication", appId, "--Vault", vaultName, "-t", tenantName });
+           
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName,
+                "--AddApplication", appId, "--Vault", vaultName });
 
         }
 
@@ -82,53 +91,41 @@ namespace DemoCommandLineTools.Tests
         [TestMethod]
         public void Deploy()
         {
-           
-           
 
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-
-            var tenantName = "car2cloud.onmicrosoft.com";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-
-            var resourcegroup = "azure-keyvault-demo";
-            var location = "West Europe";
+            
             var template = @"..\..\..\src\AzureKeyVaultDemo.Deploy\Templates\WebSite.json";
-            var websiteName = "cnug-demo-azurekeyvault";
+            var websiteName = ResourceGroupName + "-website";
             var websitePlan = "Free";
             var StorageAccountType = "Standard_LRS";
-            var hostingPlanName = "cnug-demo-azurekeyvault";
-            var deployName = "mydeployment";
+            var hostingPlanName = ResourceGroupName + "-plan";
+            var deployName = ResourceGroupName + "-deployment";
             var appId = "fb4fbba5-6fac-404e-b7b6-d7bf4b56a7ea";
-            
 
-
-
-
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "-s", subscriptionId, "-t",tenantName, "--location", location,
-                "--deploy", template,"--deployName", deployName, "--siteName", websiteName,"--websitePlan",websitePlan,"--storageAccountType",StorageAccountType,"--hostingPlanName",hostingPlanName, "--applicationId",appId});
+            Program.Main(new[] {"-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName,
+                "--location", Location, "--deploy", template,"--deployName", deployName,
+                "--siteName", websiteName,"--websitePlan",websitePlan,"--storageAccountType",StorageAccountType,
+                "--hostingPlanName",hostingPlanName, "--applicationId",appId});
 
            
 
         }
 
         /// <summary>
+        /// Read the output of the deployment unittest above to get keyvault and use for next steps.
+        /// </summary>
+        string VaultName { get; set; } = "q37pmne6oa5lu";
+        
+        /// <summary>
         /// We can create a certificate and store it as a secret in the keyvault
         /// </summary>
         [TestMethod]
         public void CreateCert()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-
-            var tenantName = "car2cloud.onmicrosoft.com";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-
+          
             var certname = "azure-keyvault-demo";
-            var resourcegroup = "azure-keyvault-demo";
-            var vaultName = "vwzdgctm7ywb6";
-
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "-t", tenantName, "-s", subscriptionId, "--vault", vaultName, "--MakeCert", "--CertificateName", certname});
+          
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName ,
+                "--vault", VaultName, "--MakeCert", "--CertificateName", certname});
 
         }
         /// <summary>
@@ -138,19 +135,12 @@ namespace DemoCommandLineTools.Tests
         public void ExportCert()
         {
 
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-
-            var tenantName = "car2cloud.onmicrosoft.com";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-
+      
             var certname = "azure-keyvault-demo";
-            var resourcegroup = "azure-keyvault-demo";
-            var vaultName = "vwzdgctm7ywb6";
-
             var location = "c:\\dev\\" + certname + ".pfx";
 
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "-s", subscriptionId, "-t",tenantName, "--ExportCert", certname, "--vault", vaultName, "-o", location });
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName,
+                "--ExportCert", certname, "--vault", VaultName, "-o", location });
 
         }
 
@@ -160,18 +150,12 @@ namespace DemoCommandLineTools.Tests
         [TestMethod]
         public void EncryptValue()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-
-            var tenantName = "car2cloud.onmicrosoft.com";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
-
-            var certname = "azure-keyvault-demo";
-            var resourcegroup = "azure-keyvault-demo";
-            var vaultName = "vwzdgctm7ywb6";
+          
+            var certname = "azure-keyvault-demo";           
             var value = "mysecretkey";
 
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "-s", subscriptionId, "-t",tenantName, "--vault", vaultName, "--CertificateName", certname, "--encrypt", value });
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName,
+                "--vault", VaultName, "--CertificateName", certname, "--encrypt", value });
 
             
 
@@ -182,19 +166,14 @@ namespace DemoCommandLineTools.Tests
         [TestMethod]
         public void DecryptValue()
         {
-            var clientId = "dedd37c0-c2c2-40fe-b1db-0b0c21d4b55a";
-            var redirectUri = "https://devops.car2cloud.dk";
-
-            var tenantName = "car2cloud.onmicrosoft.com";
-            var subscriptionId = "6d8083fe-97c5-4f4d-b5d4-cc4bf001bfcb";
 
             var certname = "azure-keyvault-demo";
-            var resourcegroup = "azure-keyvault-demo";
-            var vaultName = "vwzdgctm7ywb6";
-            var value = "MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMTE2F6dXJlLWtleXZhdWx0LWRlbW8CEEilhJ3CxxOhQGFWdRaUCMwwDQYJKoZIhvcNAQEBBQAEggEAFqmdqoiZNcfV/8sdoPxVXUruExoP85Zkgm1Vu4tQoWeewWGbF9dUTI9eV1yMl9lPFNkDy/qRbnjtocpqCQG5Tu1oWvzIOpnjpx6apJ9DQ0U5zbTxlAe8xKLRYIAnL6Hs7XsSBvhVWlGIgturjlnZE1eh0btGbxokjDY4tM7cs9fJoiavNFcxYfOyaUnVxF+8ybyNNPJHyoltfmAQV2RkclpVW+ArUiKiWLG+R3zlkeVwzDW43zAw1KCDMzvqJC3XdyQEttIJMAv9SwW5DNVSqf48JzoFxUmHZJgrL3dkRVu39lTZYzd2Iy2qG870PPXZr+r7ujredE2GS4oNMvddrDAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECP8IJme8fYA2gBDEGoC9TzQD5LTx29f6A/VN";
+            var value = "MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMTE2F6dXJlLWtleXZhdWx0LWRlbW8CEGIxLhjl5HqbRtQy8tlihOowDQYJKoZIhvcNAQEBBQAEggEArivsdt/048LhS1f3UCAXrIf546ToJTFYoF4baoTasR/qSTxeXJX6XrzvWt8ymz261vjSMg0Wh1ZrCmQayDYLwdZ1wNXTPWayOlAcdnrFkWmtNMpvJ4Mh7QDBTm7LY0lnHvoZfwEBio13s5ob8lzCfXMLEAZGxV/9RpHWTUS3fE0ikS3JFTmMdO2QyXZYDdH7wC+7J2xdN8/HTneC+tWeAJO5sBKo4DIfZ8+hV+WPxQjMPtxV2eVTpHn/uTdMA4AsRgTnGeR84sksApx1BA9n0ker5RdF8G3Y0plgwYSrnPaE3C88tAhV9ZiKfGjCQXIjVP2twx5LaS3pued8BjUdSzAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECBnM40ttbTyIgBB8ofdtyf9HqIueHRftvzfK";
 
 
-            Program.Main(new[] { "-c", clientId, "-u", redirectUri, "-r", resourcegroup, "-s", subscriptionId, "-t", tenantName, "--vault", vaultName, "--CertificateName", certname, "--decrypt", value });
+
+            Program.Main(new[] { "-c", ClientId, "-u", RedirectUri, "-s", SubscriptionId, "-t", TenantName, "-r", ResourceGroupName,
+                "--vault", VaultName, "--CertificateName", certname, "--decrypt", value });
 
 
         }

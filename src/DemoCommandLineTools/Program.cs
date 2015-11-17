@@ -122,7 +122,122 @@ namespace DemoCommandLineTools
 
                 if (!string.IsNullOrEmpty(options.SubscriptionId))
                 {
-                    using (var client = new KeyVaultManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
+
+                    using (var resourceManagementClient = new ResourceManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
+                    {
+                        HandleListVaults(options, resourceManagementClient);
+                        HandleAddToApplication(options, authContext, token);
+                        HandleCreateVault(options, authContext, token, resourceManagementClient);
+                        HandleDeploy(options, authContext, token, resourceManagementClient);
+                    }
+
+
+                    HandleCertificateOperations(options, authContext, token);
+                }
+
+            }
+        }
+
+        private static void HandleDeploy(Options options, AuthenticationContext authContext, AuthenticationResult token, ResourceManagementClient resourceManagementClient)
+        {
+            if (!string.IsNullOrWhiteSpace(options.Deploy))
+            {
+                ResourceGroupExtended rg = GetResourceGroup(options, resourceManagementClient);
+                //Fix location to displayname from template
+                using (var subscriptionClient = new SubscriptionClient(new TokenCloudCredentials(token.AccessToken)))
+                {
+                    var a = subscriptionClient.Subscriptions.ListLocations(options.SubscriptionId);
+                    rg.Location = a.Locations.Single(l => l.Name == rg.Location).DisplayName;
+                }
+
+                var graphtoken = authContext.AcquireToken("https://graph.windows.net/", options.ClientID, new Uri(options.RedirectUri), PromptBehavior.Auto);
+                var graph = new ActiveDirectoryClient(new Uri("https://graph.windows.net/" + graphtoken.TenantId), () => Task.FromResult(graphtoken.AccessToken));
+                var principal = graph.ServicePrincipals.Where(p => p.AppId == options.ApplicaitonId).ExecuteSingleAsync().GetAwaiter().GetResult();
+
+
+                DeploymentExtended deploymentInfo = null;
+                if (!resourceManagementClient.Deployments.CheckExistence(options.ResourceGroup, options.DeployName).Exists)
+                {
+
+                    var deployment = new Deployment
+                    {
+                        Properties = new DeploymentProperties
+                        {
+                            Mode = DeploymentMode.Incremental, //Dont Delete other resources
+                            Template = File.ReadAllText(options.Deploy),
+                            Parameters = new JObject(
+                                new JProperty("siteName", CreateValue(options.SiteName)),
+                                new JProperty("hostingPlanName", CreateValue(options.HostingPlanName)),
+                                new JProperty("storageAccountType", CreateValue(options.StorageAccountType)),
+                                new JProperty("siteLocation", CreateValue(rg.Location)),
+                                new JProperty("sku", CreateValue(options.WebsitePlan)),
+                                new JProperty("tenantId", CreateValue(token.TenantId)),
+                                new JProperty("objectId", CreateValue(token.UserInfo.UniqueId)),
+                                new JProperty("appOwnerTenantId", CreateValue(principal.AppOwnerTenantId.Value.ToString())),
+                                new JProperty("appOwnerObjectId", CreateValue(principal.ObjectId))
+                                ).ToString(),
+
+                        }
+                    };
+
+                    var result = resourceManagementClient.Deployments.CreateOrUpdate(options.ResourceGroup, options.DeployName, deployment);
+                    deploymentInfo = result.Deployment;
+                }
+                else
+                {
+                    var deploymentStatus = resourceManagementClient.Deployments.Get(options.ResourceGroup, options.DeployName);
+                    deploymentInfo = deploymentStatus.Deployment;
+
+                }
+
+                while (!(deploymentInfo.Properties.ProvisioningState == "Succeeded" || deploymentInfo.Properties.ProvisioningState == "Failed"))
+                {
+                    var deploymentStatus = resourceManagementClient.Deployments.Get(options.ResourceGroup, options.DeployName);
+                    deploymentInfo = deploymentStatus.Deployment;
+                    Thread.Sleep(5000);
+                }
+                Console.WriteLine(deploymentInfo.Properties.Outputs);
+                var outputs = JObject.Parse(deploymentInfo.Properties.Outputs);
+                var storageAccountName = outputs["storageAccount"]["value"].ToString();
+                var keyvaultName = outputs["keyvault"]["value"].ToString();
+
+                using (var client = new KeyVaultManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
+                {
+                    using (var storageClient = new StorageManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
+                    {
+                        var keys = storageClient.StorageAccounts.ListKeys(options.ResourceGroup, storageAccountName);
+
+                        var vaultInfo = client.Vaults.Get(options.ResourceGroup, keyvaultName);
+                        //CHEATING (using powershell application id to get token on behhalf of user);
+                        var vaultToken = authContext.AcquireToken("https://vault.azure.net", "1950a258-227b-4e31-a9cf-717495945fc2", new Uri("urn:ietf:wg:oauth:2.0:oob"));
+                        var keyvaultClient = new KeyVaultClient((_, b, c) => Task.FromResult(vaultToken.AccessToken));
+
+                        var secrets = keyvaultClient.GetSecretsAsync(vaultInfo.Vault.Properties.VaultUri).GetAwaiter().GetResult();
+                        if (secrets.Value == null || !secrets.Value.Any(s => s.Id == vaultInfo.Vault.Properties.VaultUri + "secrets/storage"))
+                        {
+                            keyvaultClient.SetSecretAsync(vaultInfo.Vault.Properties.VaultUri, "storage", $"{storageAccountName}:{keys.StorageAccountKeys.Key1}").GetAwaiter().GetResult();
+                            keyvaultClient.SetSecretAsync(vaultInfo.Vault.Properties.VaultUri, "storage", $"{storageAccountName}:{keys.StorageAccountKeys.Key2}").GetAwaiter().GetResult();
+
+
+                            var secret = keyvaultClient.GetSecretVersionsAsync(vaultInfo.Vault.Properties.VaultUri, "storage").GetAwaiter().GetResult();
+                        }
+                    }
+
+
+
+                }
+
+
+            }
+        }
+
+        private static void HandleCertificateOperations(Options options, AuthenticationContext authContext, AuthenticationResult token)
+        {
+            using (var client = new KeyVaultManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
+            {
+                if (!string.IsNullOrEmpty(options.ResourceGroup))
+                {
+                    if (!string.IsNullOrEmpty(options.Vault))
                     {
 
                         var vaultInfo = client.Vaults.Get(options.ResourceGroup, options.Vault);
@@ -189,110 +304,10 @@ namespace DemoCommandLineTools
                                        JsonConvert.SerializeObject(keyvaultClient.SetSecretAsync(vaultInfo.Vault.Properties.VaultUri, options.CertificateName, cert, null, "application/pkcs12").GetAwaiter().GetResult()
                                        , Formatting.Indented));
                             }
-                        }
-                    }
-
-                
-                
-
-                    using (var resourceManagementClient = new ResourceManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
-                    {
-                        HandleListVaults(options, resourceManagementClient);
-                        HandleAddToApplication(options, authContext, token);
-                        HandleCreateVault(options, authContext, token, resourceManagementClient);
-
-                        if (!string.IsNullOrWhiteSpace(options.Deploy))
-                        {
-                            ResourceGroupExtended rg = GetResourceGroup(options, resourceManagementClient);
-                            //Fix location to displayname from template
-                            using (var subscriptionClient = new SubscriptionClient(new TokenCloudCredentials(token.AccessToken)))
-                            {
-                                var a = subscriptionClient.Subscriptions.ListLocations(options.SubscriptionId);
-                                rg.Location = a.Locations.Single(l => l.Name == rg.Location).DisplayName;                                    
-                            }
-
-                            var graphtoken = authContext.AcquireToken("https://graph.windows.net/", options.ClientID, new Uri(options.RedirectUri), PromptBehavior.Auto);
-                            var graph = new ActiveDirectoryClient(new Uri("https://graph.windows.net/" + graphtoken.TenantId), () => Task.FromResult(graphtoken.AccessToken));
-                            var principal = graph.ServicePrincipals.Where(p => p.AppId == options.ApplicaitonId).ExecuteSingleAsync().GetAwaiter().GetResult();
-
-
-                            DeploymentExtended deploymentInfo = null;
-                            if (!resourceManagementClient.Deployments.CheckExistence(options.ResourceGroup, options.DeployName).Exists)
-                            {
-
-                                var deployment = new Deployment
-                                {
-                                    Properties = new DeploymentProperties
-                                    {
-                                        Mode = DeploymentMode.Incremental, //Dont Delete other resources
-                                        Template = File.ReadAllText(options.Deploy),
-                                        Parameters = new JObject(
-                                            new JProperty("siteName", CreateValue(options.SiteName)),
-                                            new JProperty("hostingPlanName", CreateValue(options.HostingPlanName)),
-                                            new JProperty("storageAccountType", CreateValue(options.StorageAccountType)),
-                                            new JProperty("siteLocation", CreateValue(rg.Location)),
-                                            new JProperty("sku", CreateValue(options.WebsitePlan)),
-                                            new JProperty("tenantId",CreateValue(token.TenantId)),
-                                            new JProperty("objectId",CreateValue(token.UserInfo.UniqueId)),
-                                            new JProperty("appOwnerTenantId", CreateValue(principal.AppOwnerTenantId.Value.ToString())),
-                                            new JProperty("appOwnerObjectId", CreateValue(principal.ObjectId))
-                                            ).ToString(),
-
-                                    }
-                                };
-
-                                var result = resourceManagementClient.Deployments.CreateOrUpdate(options.ResourceGroup, options.DeployName, deployment);
-                                deploymentInfo = result.Deployment;
-                            }
-                            else
-                            {
-                                var deploymentStatus = resourceManagementClient.Deployments.Get(options.ResourceGroup, options.DeployName);
-                                deploymentInfo = deploymentStatus.Deployment;
-                                
-                            }
-
-                            while(!(deploymentInfo.Properties.ProvisioningState == "Succeeded" || deploymentInfo.Properties.ProvisioningState == "Failed"))
-                            {
-                                var deploymentStatus = resourceManagementClient.Deployments.Get(options.ResourceGroup, options.DeployName);
-                                deploymentInfo = deploymentStatus.Deployment;
-                                Thread.Sleep(5000);
-                            }
-
-                            var outputs = JObject.Parse(deploymentInfo.Properties.Outputs);
-                            var storageAccountName = outputs["storageAccount"]["value"].ToString();
-                            var keyvaultName = outputs["keyvault"]["value"].ToString();
-
-                            using (var client = new KeyVaultManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
-                            {
-                                using (var storageClient = new StorageManagementClient(new TokenCloudCredentials(options.SubscriptionId, token.AccessToken)))
-                                {
-                                    var keys = storageClient.StorageAccounts.ListKeys(options.ResourceGroup, storageAccountName);
-
-                                    var vaultInfo = client.Vaults.Get(options.ResourceGroup, keyvaultName);
-                                   //CHEATING (using powershell application id to get token on behhalf of user);
-                                    var vaultToken = authContext.AcquireToken("https://vault.azure.net", "1950a258-227b-4e31-a9cf-717495945fc2", new Uri("urn:ietf:wg:oauth:2.0:oob"));
-                                    var keyvaultClient = new KeyVaultClient((_, b, c) => Task.FromResult(vaultToken.AccessToken));
-
-                                    var secrets = keyvaultClient.GetSecretsAsync(vaultInfo.Vault.Properties.VaultUri).GetAwaiter().GetResult();
-                                    if (secrets.Value == null || !secrets.Value.Any(s => s.Id == vaultInfo.Vault.Properties.VaultUri +"secrets/storage"))
-                                    {
-                                        keyvaultClient.SetSecretAsync(vaultInfo.Vault.Properties.VaultUri, "storage", $"{storageAccountName}:{keys.StorageAccountKeys.Key1}").GetAwaiter().GetResult();
-                                        keyvaultClient.SetSecretAsync(vaultInfo.Vault.Properties.VaultUri, "storage", $"{storageAccountName}:{keys.StorageAccountKeys.Key2}").GetAwaiter().GetResult();
-
-
-                                        var secret = keyvaultClient.GetSecretVersionsAsync(vaultInfo.Vault.Properties.VaultUri, "storage").GetAwaiter().GetResult();
-                                    }
-                                }
-
-                                
-                               
-                            }
 
 
                         }
                     }
-
-
                 }
 
             }
@@ -322,7 +337,8 @@ namespace DemoCommandLineTools
 
 
 
-                var vaults = resourceManagementClient.Resources.List(new ResourceListParameters { ResourceType = "Microsoft.KeyVault/vaults" });
+                var vaults = resourceManagementClient.Resources
+                    .List(new ResourceListParameters { ResourceType = "Microsoft.KeyVault/vaults" });
 
                 if (options.AllowUpdate || !vaults.Resources.Any(v => v.Name == options.CreateVault))
                 {
@@ -330,7 +346,7 @@ namespace DemoCommandLineTools
 
                     var graphtoken = authContext.AcquireToken("https://graph.windows.net/", options.ClientID, new Uri(options.RedirectUri), PromptBehavior.Auto);
                     var graph = new ActiveDirectoryClient(new Uri("https://graph.windows.net/" + graphtoken.TenantId), () => Task.FromResult(graphtoken.AccessToken));
-                    var principals = graph.ServicePrincipals.Where(p => p.AppId == options.ClientID).ExecuteSingleAsync().GetAwaiter().GetResult();
+                    var principals = graph.ServicePrincipals.Where(p => p.AppId == options.ApplicaitonId).ExecuteSingleAsync().GetAwaiter().GetResult();
 
 
                     // var a = graph.GetObjectsByObjectIdsAsync(new[] { "ffe34afb-c9e7-45bc-a8d2-c1dedc649b7c" }, new string[] { }).GetAwaiter().GetResult().ToArray();
@@ -343,6 +359,8 @@ namespace DemoCommandLineTools
                             Properties = new VaultProperties
                             {
                                 EnabledForDeployment = true,
+                               // EnabledForDiskEncryption = true,
+                               // EnabledForTemplateDeployment = true,
                                 Sku = new Sku { Name = "Premium", Family = "A" },
                                 AccessPolicies = new List<AccessPolicyEntry>{
                                             new AccessPolicyEntry{
