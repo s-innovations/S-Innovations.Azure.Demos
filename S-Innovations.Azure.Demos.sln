@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoCommandLineTools", "src\DemoCommandLineTools\DemoCommandLineTools.csproj", "{B28E023A-FEE5-4164-9C24-4BAFF60FE785}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoCommandLineTools.Tests", "DemoCommandLineTools.Tests\DemoCommandLineTools.Tests.csproj", "{B957AA09-8350-4962-82F9-06687A3632C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoCommandLineTools.Tests", "tests\DemoCommandLineTools.Tests\DemoCommandLineTools.Tests.csproj", "{B957AA09-8350-4962-82F9-06687A3632C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
