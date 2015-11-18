@@ -92,7 +92,6 @@ namespace DemoCommandLineTools.Tests
         public void Deploy()
         {
 
-            
             var template = @"..\..\..\src\AzureKeyVaultDemo.Deploy\Templates\WebSite.json";
             var websiteName = ResourceGroupName + "-website";
             var websitePlan = "Free";
@@ -105,9 +104,7 @@ namespace DemoCommandLineTools.Tests
                 "--location", Location, "--deploy", template,"--deployName", deployName,
                 "--siteName", websiteName,"--websitePlan",websitePlan,"--storageAccountType",StorageAccountType,
                 "--hostingPlanName",hostingPlanName, "--applicationId",appId});
-
-           
-
+            
         }
 
         /// <summary>
