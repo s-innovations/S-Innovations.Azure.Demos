@@ -4,7 +4,7 @@
 
 ## Notes from Lasse
 
-[powerpoint](../../docs/Azure User Group - Azure Key Vault 17 nov.pptx)
+[powerpoint](https://github.com/s-innovations/S-Innovations.Azure.Demos/raw/master/docs/Azure%20User%20Group%20-%20Azure%20Key%20Vault%2017%20nov.pptx)
 
 [https://social.msdn.microsoft.com/Forums/azure/en-US/56bed4bd-6320-4f1f-9af5-556ae91bdf0f/storing-sql-connection-string-passwords-in-key-vault-for-my-cloud-services?forum=AzureKeyVault&prof=required](https://social.msdn.microsoft.com/Forums/azure/en-US/56bed4bd-6320-4f1f-9af5-556ae91bdf0f/storing-sql-connection-string-passwords-in-key-vault-for-my-cloud-services?forum=AzureKeyVault&prof=required)
 
